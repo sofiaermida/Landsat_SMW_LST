@@ -51,6 +51,9 @@ OUTPUTS:
           - 'TPW': total precipitable water [mm]
           - 'EM': surface emissvity for TIR band
           - 'LST': land surface temperature
+
+  14-08-2020: update to avoid using the getInfo() and if() 
+    (Thanks Tyler Erickson for the suggestion)
 */
 
 // MODULES DECLARATION -----------------------------------------------------------
@@ -68,55 +71,62 @@ var EM = require('users/sofiaermida/landsat_smw_lst:modules/compute_emissivity.j
 var LST = require('users/sofiaermida/landsat_smw_lst:modules/SMWalgorithm.js')
 // --------------------------------------------------------------------------------
 
+var COLLECTION = ee.Dictionary({
+  'L4': {
+    'TOA': ee.ImageCollection('LANDSAT/LT04/C01/T1_TOA'),
+    'SR': ee.ImageCollection('LANDSAT/LT04/C01/T1_SR'),
+    'TIR': ['B6',]
+  },
+  'L5': {
+    'TOA': ee.ImageCollection('LANDSAT/LT05/C01/T1_TOA'),
+    'SR': ee.ImageCollection('LANDSAT/LT05/C01/T1_SR'),
+    'TIR': ['B6',]
+  },
+  'L7': {
+    'TOA': ee.ImageCollection('LANDSAT/LE07/C01/T1_TOA'),
+    'SR': ee.ImageCollection('LANDSAT/LE07/C01/T1_SR'),
+    'TIR': ['B6_VCID_1','B6_VCID_2'],
+  },
+  'L8': {
+    'TOA': ee.ImageCollection('LANDSAT/LC08/C01/T1_TOA'),
+    'SR': ee.ImageCollection('LANDSAT/LC08/C01/T1_SR'),
+    'TIR': ['B10','B11']
+  }
+});
 
 exports.collection = function(landsat, date_start, date_end, geometry, use_ndvi){
 
-  // select collections
-  var toa_collection = ee.String(
-    ee.Algorithms.If(landsat==='L4','LANDSAT/LT04/C01/T1_TOA',
-    ee.Algorithms.If(landsat==='L5','LANDSAT/LT05/C01/T1_TOA',
-    ee.Algorithms.If(landsat==='L7','LANDSAT/LE07/C01/T1_TOA',
-                                    'LANDSAT/LC08/C01/T1_TOA')))
-  );
-  
-  var sr_collection = ee.String(
-    ee.Algorithms.If(landsat==='L4','LANDSAT/LT04/C01/T1_SR',
-    ee.Algorithms.If(landsat==='L5','LANDSAT/LT05/C01/T1_SR',
-    ee.Algorithms.If(landsat==='L7','LANDSAT/LE07/C01/T1_SR',
-                                    'LANDSAT/LC08/C01/T1_SR')))
-  );
 
   // load TOA Radiance/Reflectance
-  var landsatTOA = ee.ImageCollection(toa_collection.getInfo())
+  var collection_dict = ee.Dictionary(COLLECTION.get(landsat));
+
+  var landsatTOA = ee.ImageCollection(collection_dict.get('TOA'))
                 .filter(ee.Filter.date(date_start, date_end))
                 .filterBounds(geometry)
-                .map(cloudmask.toa)
+                .map(cloudmask.toa);
   
               
   // load Surface Reflectance collection for NDVI
-  var landsatSR = ee.ImageCollection(sr_collection.getInfo())
+  var landsatSR = ee.ImageCollection(collection_dict.get('SR'))
                 .filter(ee.Filter.date(date_start, date_end))
                 .filterBounds(geometry)
                 .map(cloudmask.sr)
                 .map(NDVI.addBand(landsat))
                 .map(FVC.addBand(landsat))
                 .map(NCEP_TPW.addBand)
-                .map(EM.addBand(landsat,use_ndvi))
+                .map(EM.addBand(landsat,use_ndvi));
 
   // combine collections
   // all channels from surface reflectance collection
   // except tir channels: from TOA collection
   // select TIR bands
-  var tir = ee.List(
-    ee.Algorithms.If(landsat==='L8',['B10','B11'],
-    ee.Algorithms.If(landsat==='L7',['B6_VCID_1','B6_VCID_2'],
-                                    ['B6',])));
-  var landsatALL = (landsatSR.combine(landsatTOA.select(tir),true))
+  var tir = ee.List(collection_dict.get('TIR'));
+  var landsatALL = (landsatSR.combine(landsatTOA.select(tir),true));
   
   // compute the LST
   var landsatLST = landsatALL.map(LST.addBand(landsat));
 
-  return landsatLST
+  return landsatLST;
 
 };
 
