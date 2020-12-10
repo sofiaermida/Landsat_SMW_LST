@@ -29,6 +29,8 @@ OUTPUTS:
           the input image with 3 new bands: 
           'TPW': total precipitable water values
           'TPWpos': index for the LUT of SMW algorithm coefficients
+          
+  10.12.2020: bug correction in the tpw interpolation expression
 */
 
 exports.addBand = function(image){
@@ -70,7 +72,7 @@ exports.addBand = function(image){
   var time2 = ee.Number(ee.Algorithms.If(closest.size().lt(2), 0.0,
                         ee.Number(tpw2.get('DateDist')).divide(ee.Number(21600000)) ));
   
-  var tpw = tpw1.expression('tpw1*time1+tpw2*time2',
+  var tpw = tpw1.expression('tpw1*time2+tpw2*time1',
                             {'tpw1':tpw1,
                             'time1':time1,
                             'tpw2':tpw2,
