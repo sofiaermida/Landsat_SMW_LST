@@ -27,13 +27,13 @@ exports.addBand = function(landsat){
   var wrap = function(image){
     
     // choose bands
-    var nir = ee.String(ee.Algorithms.If(landsat==='L8','B5','B4'))
-    var red = ee.String(ee.Algorithms.If(landsat==='L8','B4','B3'))
+    var nir = ee.String(ee.Algorithms.If(landsat==='L8','SR_B5','SR_B4'))
+    var red = ee.String(ee.Algorithms.If(landsat==='L8','SR_B4','SR_B3'))
   
     // compute NDVI 
     return image.addBands(image.expression('(nir-red)/(nir+red)',{
-      'nir':image.select(nir).multiply(0.0001),
-      'red':image.select(red).multiply(0.0001)
+      'nir':image.select(nir).multiply(0.0000275).add(-0.2),
+      'red':image.select(red).multiply(0.0000275).add(-0.2)
     }).rename('NDVI'))
   }
   return wrap

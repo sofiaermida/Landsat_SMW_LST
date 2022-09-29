@@ -22,8 +22,8 @@ var LandsatLST = require('users/sofiaermida/landsat_smw_lst:modules/Landsat_LST.
 // select region of interest, date range, and landsat satellite
 var geometry = ee.Geometry.Rectangle([-8.91, 40.0, -8.3, 40.4]);
 var satellite = 'L8';
-var date_start = '2018-05-15';
-var date_end = '2018-05-31';
+var date_start = '2022-05-15';
+var date_end = '2022-05-31';
 var use_ndvi = true;
 
 // get landsat collection with added variables: NDVI, FVC, TPW, EM, LST
@@ -43,7 +43,7 @@ Map.addLayer(exImage.select('FVC'),{min:0.0, max:1.0, palette:cmap2}, 'FVC')
 Map.addLayer(exImage.select('EM'),{min:0.9, max:1.0, palette:cmap1}, 'Emissivity')
 Map.addLayer(exImage.select('B10'),{min:290, max:320, palette:cmap1}, 'TIR BT')
 Map.addLayer(exImage.select('LST'),{min:290, max:320, palette:cmap1}, 'LST')
-Map.addLayer(exImage.multiply(0.0001),{bands: ['B4', 'B3', 'B2'], min:0, max:0.3}, 'RGB')
+Map.addLayer(exImage.multiply(0.0000275).add(-0.2),{bands: ['SR_B4', 'SR_B3', 'SR_B2'], min:0, max:0.3}, 'RGB')
 
 // uncomment the code below to export a image band to your drive
 /*
