@@ -54,6 +54,8 @@ OUTPUTS:
 
   14-08-2020: update to avoid using the getInfo() and if() 
     (Thanks Tyler Erickson for the suggestion)
+    
+  11-07-2022: update to use collection 2
 */
 
 // MODULES DECLARATION -----------------------------------------------------------
@@ -73,24 +75,28 @@ var LST = require('users/sofiaermida/landsat_smw_lst:modules/SMWalgorithm.js')
 
 var COLLECTION = ee.Dictionary({
   'L4': {
-    'TOA': ee.ImageCollection('LANDSAT/LT04/C01/T1_TOA'),
-    'SR': ee.ImageCollection('LANDSAT/LT04/C01/T1_SR'),
-    'TIR': ['B6',]
+    'TOA': ee.ImageCollection('LANDSAT/LT04/C02/T1_TOA'),
+    'SR': ee.ImageCollection('LANDSAT/LT04/C02/T1_L2'),
+    'TIR': ['B6',],
+    'VISW': ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B7','QA_PIXEL']
   },
   'L5': {
-    'TOA': ee.ImageCollection('LANDSAT/LT05/C01/T1_TOA'),
-    'SR': ee.ImageCollection('LANDSAT/LT05/C01/T1_SR'),
-    'TIR': ['B6',]
+    'TOA': ee.ImageCollection('LANDSAT/LT05/C02/T1_TOA'),
+    'SR': ee.ImageCollection('LANDSAT/LT05/C02/T1_L2'),
+    'TIR': ['B6',],
+    'VISW': ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B7','QA_PIXEL']
   },
   'L7': {
-    'TOA': ee.ImageCollection('LANDSAT/LE07/C01/T1_TOA'),
-    'SR': ee.ImageCollection('LANDSAT/LE07/C01/T1_SR'),
+    'TOA': ee.ImageCollection('LANDSAT/LE07/C02/T1_TOA'),
+    'SR': ee.ImageCollection('LANDSAT/LE07/C02/T1_L2'),
     'TIR': ['B6_VCID_1','B6_VCID_2'],
+    'VISW': ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B7','QA_PIXEL']
   },
   'L8': {
-    'TOA': ee.ImageCollection('LANDSAT/LC08/C01/T1_TOA'),
-    'SR': ee.ImageCollection('LANDSAT/LC08/C01/T1_SR'),
-    'TIR': ['B10','B11']
+    'TOA': ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA'),
+    'SR': ee.ImageCollection('LANDSAT/LC08/C02/T1_L2'),
+    'TIR': ['B10','B11'],
+    'VISW': ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7','QA_PIXEL']
   }
 });
 
@@ -103,7 +109,7 @@ exports.collection = function(landsat, date_start, date_end, geometry, use_ndvi)
   var landsatTOA = ee.ImageCollection(collection_dict.get('TOA'))
                 .filter(ee.Filter.date(date_start, date_end))
                 .filterBounds(geometry)
-                .map(cloudmask.toa);
+                //.map(cloudmask.toa);
   
               
   // load Surface Reflectance collection for NDVI
@@ -121,7 +127,13 @@ exports.collection = function(landsat, date_start, date_end, geometry, use_ndvi)
   // except tir channels: from TOA collection
   // select TIR bands
   var tir = ee.List(collection_dict.get('TIR'));
-  var landsatALL = (landsatSR.combine(landsatTOA.select(tir),true));
+  var visw = ee.List(collection_dict.get('VISW'))
+    .add('NDVI')
+    .add('FVC')
+    .add('TPW')
+    .add('TPWpos')
+    .add('EM');
+  var landsatALL = (landsatSR.select(visw).combine(landsatTOA.select(tir), true));
   
   // compute the LST
   var landsatLST = landsatALL.map(LST.addBand(landsat));
