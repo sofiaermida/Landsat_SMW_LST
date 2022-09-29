@@ -92,6 +92,12 @@ exports.addBand = function(landsat, use_ndvi){
       
     // select which emissivity to output based on user selection
     var EM = ee.Image(ee.Algorithms.If(use_ndvi,EMd,EM0));
+      
+    // prescribe emissivity of water bodies
+    var qa = image.select('QA_PIXEL');
+    EM = EM.where(qa.bitwiseAnd(1 << 7),0.99);
+    // prescribe emissivity of snow/ice bodies
+    EM = EM.where(qa.bitwiseAnd(1 << 5),0.989);
    
     return image.addBands(EM.rename('EM'));
   }
