@@ -21,14 +21,20 @@ OUTPUTS:
         - <ee.Image>
           the input image with 1 new band: 
           'NDVI': normalized difference vegetation index
+          
+  11-07-2022: update to use Collection 2 Level 2 Surface Reflectance data
+  
+  02-08-2023: update to process Landsat 9
 */
 
 exports.addBand = function(landsat){
   var wrap = function(image){
     
     // choose bands
-    var nir = ee.String(ee.Algorithms.If(landsat==='L8','SR_B5','SR_B4'))
-    var red = ee.String(ee.Algorithms.If(landsat==='L8','SR_B4','SR_B3'))
+    var nir = ee.String(ee.Algorithms.If(landsat==='L8','SR_B5',
+                        ee.Algorithms.If(landsat==='L9','SR_B5','SR_B4')))
+    var red = ee.String(ee.Algorithms.If(landsat==='L8','SR_B4',
+                        ee.Algorithms.If(landsat==='L9','SR_B4','SR_B3')))
   
     // compute NDVI 
     return image.addBands(image.expression('(nir-red)/(nir+red)',{
