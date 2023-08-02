@@ -61,3 +61,16 @@ exports.coeff_SMW_L8 = ee.FeatureCollection([
   ee.Feature(null, {'TPWpos': 8, 'A': 1.5468, 'B': -429.5095, 'C': 275.0895}),
   ee.Feature(null, {'TPWpos': 9, 'A': 1.9403, 'B': -547.2681, 'C': 277.9953})
 ]);
+
+exports.coeff_SMW_L9 = ee.FeatureCollection([
+  ee.Feature(null, {'TPWpos': 0, 'A': 0.9751, 'B': -206.2187, 'C': 213.0526}),
+  ee.Feature(null, {'TPWpos': 1, 'A': 1.0093, 'B': -232.7408, 'C': 230.9401}),
+  ee.Feature(null, {'TPWpos': 2, 'A': 1.0539, 'B': -253.4430, 'C': 239.2572}),
+  ee.Feature(null, {'TPWpos': 3, 'A': 1.1267, 'B': -279.1685, 'C': 244.2379}),
+  ee.Feature(null, {'TPWpos': 4, 'A': 1.1961, 'B': -306.7961, 'C': 251.8873}),
+  ee.Feature(null, {'TPWpos': 5, 'A': 1.3155, 'B': -346.5312, 'C': 257.2174}),
+  ee.Feature(null, {'TPWpos': 6, 'A': 1.4463, 'B': -390.7794, 'C': 263.3479}),
+  ee.Feature(null, {'TPWpos': 7, 'A': 1.6229, 'B': -447.2745, 'C': 268.5970}),
+  ee.Feature(null, {'TPWpos': 8, 'A': 1.5396, 'B': -427.0904, 'C': 274.6380}),
+  ee.Feature(null, {'TPWpos': 9, 'A': 1.9223, 'B': -541.7084, 'C': 277.4964}),
+]);
