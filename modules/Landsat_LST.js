@@ -56,6 +56,8 @@ OUTPUTS:
     (Thanks Tyler Erickson for the suggestion)
     
   11-07-2022: update to use collection 2
+  
+  02-08-2023: update to process Landsat 9
 */
 
 // MODULES DECLARATION -----------------------------------------------------------
@@ -95,6 +97,12 @@ var COLLECTION = ee.Dictionary({
   'L8': {
     'TOA': ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA'),
     'SR': ee.ImageCollection('LANDSAT/LC08/C02/T1_L2'),
+    'TIR': ['B10','B11'],
+    'VISW': ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7','QA_PIXEL']
+  },
+  'L9': {
+    'TOA': ee.ImageCollection('LANDSAT/LC09/C02/T1_TOA'),
+    'SR': ee.ImageCollection('LANDSAT/LC09/C02/T1_L2'),
     'TIR': ['B10','B11'],
     'VISW': ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7','QA_PIXEL']
   }
