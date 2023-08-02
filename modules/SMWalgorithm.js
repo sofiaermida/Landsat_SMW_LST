@@ -31,6 +31,8 @@ OUTPUTS:
         - <ee.Image>
           the input image with 1 new band: 
           'LST': land surface temperature
+          
+  02-08-2023: update to process Landsat 9
 */
 
 
@@ -54,7 +56,8 @@ exports.addBand = function(landsat){
     var coeff_SMW = ee.FeatureCollection(ee.Algorithms.If(landsat==='L4',SMWcoef.coeff_SMW_L4,
                                         ee.Algorithms.If(landsat==='L5',SMWcoef.coeff_SMW_L5,
                                         ee.Algorithms.If(landsat==='L7',SMWcoef.coeff_SMW_L7,
-                                        SMWcoef.coeff_SMW_L8))));
+                                        ee.Algorithms.If(landsat==='L8',SMWcoef.coeff_SMW_L8,
+                                        SMWcoef.coeff_SMW_L9)))));
     
     // Create lookups for the algorithm coefficients
     var A_lookup = get_lookup_table(coeff_SMW, 'TPWpos', 'A');
@@ -67,9 +70,10 @@ exports.addBand = function(landsat){
     var C_img = image.remap(C_lookup.get(0), C_lookup.get(1),0.0,'TPWpos').resample('bilinear');
     
     // select TIR band
-    var tir = ee.String(ee.Algorithms.If(landsat==='L8','B10',
+    var tir = ee.String(ee.Algorithms.If(landsat==='L9','B10',
+                        ee.Algorithms.If(landsat==='L8','B10',
                         ee.Algorithms.If(landsat==='L7','B6_VCID_1',
-                        'B6')));
+                        'B6'))));
     // compute the LST
     var lst = image.expression(
       'A*Tb1/em1 + B/em1 + C',
